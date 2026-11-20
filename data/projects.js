@@ -18,8 +18,7 @@ window.MARCUS_VANCE_DATA = {
       'Independent creative developer, design engineer, and studio founder crafting tactile web experiences with a taste for pure digital originality.'
   },
 
-  fallbackImage:
-    'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1400&q=85',
+  fallbackImage: 'assets/images/project-01.jpg',
 
   projects: [
     {
@@ -31,9 +30,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Spatial Interface & Identity',
       role: 'Design Engineering, WebGL',
       url: 'https://kestrellabs.example.com',
-      image:
-        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1400&q=85',
-      filter: 'contrast(1.04) saturate(0.92)',
+      image: 'assets/images/project-01.jpg',
+      secondaryImage: 'assets/images/project-04.jpg',
+      filter: 'contrast(1.04) saturate(0.95)',
       featured: true,
       summary:
         'A tactile product showcase and real-time telemetry interface for Kestrel Labs’ autonomous aerial mapping platform. Built with custom shader transitions, kinetic typography, and sub-300ms page loads.',
@@ -49,9 +48,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Editorial Architecture',
       role: 'Frontend Architecture, Motion',
       url: 'https://solstice-offgrid.example.com',
-      image:
-        'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=1400&q=85',
-      filter: 'contrast(1.06) brightness(0.96)',
+      image: 'assets/images/project-02.jpg',
+      secondaryImage: 'assets/images/project-08.jpg',
+      filter: 'contrast(1.05) brightness(0.97)',
       featured: true,
       summary:
         'Digital flagship for an off-grid architectural collective. Designed around daylight-responsive color tokens, paper-grain tactility, and a serene horizontal archive of solar residences.',
@@ -67,9 +66,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'E-Commerce & Object Archive',
       role: 'Lead Creative Developer',
       url: 'https://alderandco.example.com',
-      image:
-        'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=1400&q=85',
-      filter: 'contrast(1.02) saturate(0.85)',
+      image: 'assets/images/project-03.jpg',
+      secondaryImage: 'assets/images/project-12.jpg',
+      filter: 'contrast(1.03) saturate(0.90)',
       featured: true,
       summary:
         'A quiet, museum-grade commerce experience for London furniture maker Alder & Co. Features hairline specification tables, tactile material swatches, and instant drawer checkout.',
@@ -85,9 +84,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Developer Tooling & System',
       role: 'Design Engineer',
       url: 'https://monolith-os.example.com',
-      image:
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85',
-      filter: 'contrast(1.08) saturate(0.80)',
+      image: 'assets/images/project-04.jpg',
+      secondaryImage: 'assets/images/project-07.jpg',
+      filter: 'contrast(1.06) saturate(0.88)',
       featured: true,
       summary:
         'Launch site and interactive command-line playground for Monolith OS — a minimalist local-first operating environment for systems engineers. Engineered for 120fps scrolling and zero layout shift.',
@@ -103,9 +102,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Gallery & Cultural Platform',
       role: 'Creative Development',
       url: 'https://vespera-gallery.example.com',
-      image:
-        'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1400&q=85',
-      filter: 'contrast(1.03) brightness(0.95)',
+      image: 'assets/images/project-05.jpg',
+      secondaryImage: 'assets/images/project-11.jpg',
+      filter: 'contrast(1.04) brightness(0.96)',
       featured: true,
       summary:
         'Exhibition archive and timed-entry platform for Vespera Contemporary. Pairs austere Swiss typography with fluid image drums and ambient exhibition room telemetry.',
@@ -121,9 +120,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Hardware & Acoustic Web',
       role: 'Design Engineering, Audio UI',
       url: 'https://cinderaudio.example.com',
-      image:
-        'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1400&q=85',
-      filter: 'contrast(1.1) grayscale(0.25)',
+      image: 'assets/images/project-06.jpg',
+      secondaryImage: 'assets/images/project-10.jpg',
+      filter: 'contrast(1.08) grayscale(0.18)',
       featured: true,
       summary:
         'Interactive acoustic showcase for Cinder’s precision milled studio monitors. Includes real-time Web Audio frequency response curves and hardware-inspired rotary controls.',
@@ -139,9 +138,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Research Lab & Identity',
       role: 'Brand Engineering',
       url: 'https://halcyon-research.example.com',
-      image:
-        'https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1400&q=85',
-      filter: 'hue-rotate(16deg) contrast(1.06)',
+      image: 'assets/images/project-07.jpg',
+      secondaryImage: 'assets/images/project-01.jpg',
+      filter: 'contrast(1.05)',
       featured: false,
       summary:
         'Restrained editorial web presence for an applied AI interpretability lab. Strips away industry clichés in favor of monograph-grade typography, live paper citations, and clean diagrams.',
@@ -157,9 +156,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Independent Publishing',
       role: 'Design & Development',
       url: 'https://tactileform.example.com',
-      image:
-        'https://images.unsplash.com/photo-1558591710-4b4a1ae0f04d?auto=format&fit=crop&w=1400&q=85',
-      filter: 'contrast(1.08) brightness(0.92)',
+      image: 'assets/images/project-08.jpg',
+      secondaryImage: 'assets/images/project-03.jpg',
+      filter: 'contrast(1.06) brightness(0.95)',
       featured: false,
       summary:
         'A digital monograph and print-edition store exploring industrial design artifacts from 1968–1984. Built with paper-grain shaders, keyboard-first reading modes, and instant index filtering.',
@@ -175,9 +174,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Infrastructure & Telemetry',
       role: 'Frontend Lead',
       url: 'https://aethercloud.example.com',
-      image:
-        'https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=1400&q=85',
-      filter: 'hue-rotate(-14deg) contrast(1.05)',
+      image: 'assets/images/project-09.jpg',
+      secondaryImage: 'assets/images/project-04.jpg',
+      filter: 'contrast(1.04)',
       featured: false,
       summary:
         'Global edge-compute status portal and marketing system for Aether. Highlights live regional latency metrics inside a calm, obsidian-slate HUD inspired by precision instrumentation.',
@@ -193,9 +192,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Industrial Design Portfolio',
       role: 'Creative Developer',
       url: 'https://kurostudio.example.com',
-      image:
-        'https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1400&q=85',
-      filter: 'grayscale(0.35) contrast(1.1)',
+      image: 'assets/images/project-10.jpg',
+      secondaryImage: 'assets/images/project-06.jpg',
+      filter: 'grayscale(0.22) contrast(1.08)',
       featured: false,
       summary:
         'Minimalist portfolio for Tokyo & London industrial design practice Kuro. Centered on unhurried pacing, hairline index directories, and tactile cursor-tracking previews.',
@@ -211,9 +210,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Financial Instrument UI',
       role: 'Design Engineering',
       url: 'https://meridian-fx.example.com',
-      image:
-        'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1400&q=85',
-      filter: 'saturate(0.75) contrast(1.06)',
+      image: 'assets/images/project-11.jpg',
+      secondaryImage: 'assets/images/project-02.jpg',
+      filter: 'saturate(0.85) contrast(1.05)',
       featured: false,
       summary:
         'Institutional treasury interface and public specification site for Meridian. Focused on tabular numeric legibility, instant keyboard command workflows, and zero visual noise.',
@@ -229,9 +228,9 @@ window.MARCUS_VANCE_DATA = {
       category: 'Lighting & Spatial Objects',
       role: 'Design & Code',
       url: 'https://opaline-objects.example.com',
-      image:
-        'https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1400&q=85',
-      filter: 'brightness(0.94) contrast(1.05)',
+      image: 'assets/images/project-12.jpg',
+      secondaryImage: 'assets/images/project-05.jpg',
+      filter: 'brightness(0.96) contrast(1.04)',
       featured: false,
       summary:
         'Digital catalogue for hand-blown architectural glass lighting studio Opaline. Uses subtle light-refraction hover states and dual dark/light studio environments to mirror the fixtures.',

@@ -38,7 +38,11 @@
     stageCounter: document.getElementById('stage-counter'),
     stageFooterCounter: document.getElementById('stage-footer-counter'),
     stageFrame: document.getElementById('stage-frame'),
+    stageFrameRight: document.getElementById('stage-frame-right'),
     stageImg: document.getElementById('stage-img'),
+    stageImgRight: document.getElementById('stage-img-right'),
+    stageLeftCaption: document.getElementById('stage-left-caption'),
+    stageRightCaption: document.getElementById('stage-right-caption'),
     stageTitle: document.getElementById('stage-title'),
     stageCollab: document.getElementById('stage-collab'),
     stageYear: document.getElementById('stage-year'),
@@ -229,6 +233,13 @@
         el.stageImg.alt = `${current.title} — ${current.category}`;
         el.stageImg.style.filter = current.filter || 'none';
       }
+      if (el.stageImgRight) {
+        el.stageImgRight.src = current.secondaryImage || next.image;
+        el.stageImgRight.alt = `${current.title} — Secondary Frame`;
+        el.stageImgRight.style.filter = current.filter || 'none';
+      }
+      if (el.stageLeftCaption) el.stageLeftCaption.textContent = `${current.index} / FIG. A`;
+      if (el.stageRightCaption) el.stageRightCaption.textContent = `${current.index} / FIG. B`;
       if (el.stageTitle) el.stageTitle.textContent = current.title;
       if (el.stageCollab) el.stageCollab.textContent = current.collaborator;
       if (el.stageYear) el.stageYear.textContent = current.year;
@@ -254,18 +265,20 @@
     const outClass = direction > 0 ? 'is-out-up' : 'is-out-down';
     const inClass = direction > 0 ? 'is-out-down' : 'is-out-up';
 
-    el.stageFrame.classList.add('is-switching');
-    el.stageTitle.classList.add(outClass);
+    el.stageFrame?.classList.add('is-switching');
+    el.stageFrameRight?.classList.add('is-switching');
+    el.stageTitle?.classList.add(outClass);
 
     setTimeout(() => {
       applyContent();
-      el.stageTitle.classList.remove(outClass);
-      el.stageTitle.classList.add(inClass);
+      el.stageTitle?.classList.remove(outClass);
+      el.stageTitle?.classList.add(inClass);
 
       requestAnimationFrame(() => {
         requestAnimationFrame(() => {
-          el.stageFrame.classList.remove('is-switching');
-          el.stageTitle.classList.remove(inClass);
+          el.stageFrame?.classList.remove('is-switching');
+          el.stageFrameRight?.classList.remove('is-switching');
+          el.stageTitle?.classList.remove(inClass);
           state.isSwitching = false;
         });
       });
@@ -281,6 +294,7 @@
 
   function initStageInteractions() {
     applyImageFallback(el.stageImg);
+    applyImageFallback(el.stageImgRight);
     applyImageFallback(el.stagePrevImg);
     applyImageFallback(el.stageNextImg);
 
@@ -290,6 +304,10 @@
     el.stageNextBtn?.addEventListener('click', () => stepStage(1));
 
     el.stageViewBtn?.addEventListener('click', () => {
+      openProjectDrawer(STAGE_PROJECTS[state.stageIndex]);
+    });
+
+    el.stageFrameRight?.addEventListener('click', () => {
       openProjectDrawer(STAGE_PROJECTS[state.stageIndex]);
     });
 
