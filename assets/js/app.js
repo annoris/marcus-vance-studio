@@ -1,812 +1,836 @@
 /**
- * Marcus Vance :: Creative Developer & Brand Engineer
- * Interactive Stage, Telemetry HUD, Selected Work Index,
- * Command Palette (⌘K), and Slide-Over Drawers.
+ * Marcus Vance Studio — Twin-Wheel 100vh Stage Engine
+ * Counter-rotating linked 3D curved wheels, live telemetry,
+ * peer presence cursors, slide-over drawers, and ⌘K command palette.
  */
-
 (function () {
   'use strict';
 
   const DATA = window.MARCUS_VANCE_DATA;
-  if (!DATA) return;
+  if (!DATA || !Array.isArray(DATA.projects)) return;
 
-  const STAGE_PROJECTS = DATA.projects.filter((p) => p.featured);
-  const ALL_PROJECTS = DATA.projects;
-  const FALLBACK_IMG = DATA.fallbackImage;
+  const PROJECTS = DATA.projects;
+  const TOTAL = PROJECTS.length;
 
-  const state = {
-    stageIndex: 0,
-    isSwitching: false,
-    drawerOpen: false,
-    cmdOpen: false,
-    cmdFiltered: [],
-    cmdActiveIndex: 0,
-    toastTimer: null
-  };
+  // Custom geometric SVG emblems for the 12 metallic badge tiles
+  const BADGE_EMBLEMS = [
+    // 01 Kestrel — precision wing / chevron
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 34L24 10L40 34H31L24 23L17 34H8Z"/><circle cx="24" cy="34" r="2.5" fill="currentColor" stroke="none"/></svg>',
+    // 02 Solstice — solar horizon ring
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="11"/><path d="M6 24H42"/><circle cx="24" cy="13" r="2.5" fill="currentColor" stroke="none"/></svg>',
+    // 03 Alder & Co — architectural arch + plinth
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 37V22C13 15.9 17.9 11 24 11C30.1 11 35 15.9 35 22V37"/><path d="M9 37H39"/><path d="M24 11V37"/></svg>',
+    // 04 Monolith OS — stacked slabs
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="11" y="10" width="26" height="8" rx="2"/><rect x="11" y="21" width="26" height="8" rx="2"/><rect x="11" y="32" width="16" height="6" rx="2"/></svg>',
+    // 05 Vespera — twin intersecting diamonds
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><polygon points="24,8 38,24 24,40 10,24"/><polygon points="24,15 31,24 24,33 17,24"/></svg>',
+    // 06 Cinder — acoustic wave bars
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M10 20V28M17 14V34M24 9V39M31 15V33M38 20V28"/></svg>',
+    // 07 Halcyon — orbital rings
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="24" cy="24" rx="16" ry="8" transform="rotate(-30 24 24)"/><ellipse cx="24" cy="24" rx="16" ry="8" transform="rotate(30 24 24)"/><circle cx="24" cy="24" r="3" fill="currentColor" stroke="none"/></svg>',
+    // 08 Meridian — compass grid
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="24" cy="24" r="14"/><path d="M24 6V42M6 24H42"/><circle cx="24" cy="24" r="4"/></svg>',
+    // 09 Folio — editorial grid frame
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><rect x="10" y="10" width="28" height="28" rx="3"/><path d="M22 10V38M10 22H38"/></svg>',
+    // 10 Foundry — geometric prism
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><polygon points="24,9 39,17 39,31 24,39 9,31 9,17"/><path d="M24 9V39M9 17L39 31"/></svg>',
+    // 11 Nocturne — crescent & meridian
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><path d="M31 12A13 13 0 1 0 36 31A10 10 0 1 1 31 12Z"/><circle cx="33" cy="17" r="2" fill="currentColor" stroke="none"/></svg>',
+    // 12 Opaline — light refraction lens
+    '<svg class="hv2__badge-svg" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="2"><circle cx="19" cy="24" r="10"/><circle cx="29" cy="24" r="10"/></svg>'
+  ];
 
-  /* DOM References */
-  const el = {
-    root: document.documentElement,
-    body: document.body,
-    hudTime: document.getElementById('hud-time'),
-    hudFps: document.getElementById('hud-fps'),
-    hudLcp: document.getElementById('hud-lcp'),
-    themeToggle: document.getElementById('theme-toggle'),
-    cmdTrigger: document.getElementById('cmd-trigger'),
-
-    stage: document.getElementById('stage'),
-    stageCounter: document.getElementById('stage-counter'),
-    stageFooterCounter: document.getElementById('stage-footer-counter'),
-    stageFrame: document.getElementById('stage-frame'),
-    stageFrameRight: document.getElementById('stage-frame-right'),
-    stageImg: document.getElementById('stage-img'),
-    stageImgRight: document.getElementById('stage-img-right'),
-    stageLeftCaption: document.getElementById('stage-left-caption'),
-    stageRightCaption: document.getElementById('stage-right-caption'),
-    stageTitle: document.getElementById('stage-title'),
-    stageCollab: document.getElementById('stage-collab'),
-    stageYear: document.getElementById('stage-year'),
-    stageViewBtn: document.getElementById('stage-view-btn'),
-    stagePrevCard: document.getElementById('stage-prev-card'),
-    stageNextCard: document.getElementById('stage-next-card'),
-    stagePrevImg: document.getElementById('stage-prev-img'),
-    stageNextImg: document.getElementById('stage-next-img'),
-    stagePrevBtn: document.getElementById('stage-prev-btn'),
-    stageNextBtn: document.getElementById('stage-next-btn'),
-
-    classicList: document.getElementById('classic-list'),
-    hoverPreview: document.getElementById('hover-preview'),
-    hoverPreviewImg: document.getElementById('hover-preview-img'),
-
-    drawerBackdrop: document.getElementById('drawer-backdrop'),
-    drawer: document.getElementById('drawer'),
-    drawerEyebrow: document.getElementById('drawer-eyebrow'),
-    drawerBody: document.getElementById('drawer-body'),
-    drawerClose: document.getElementById('drawer-close'),
-
-    cmd: document.getElementById('cmd'),
-    cmdInput: document.getElementById('cmd-input'),
-    cmdList: document.getElementById('cmd-list'),
-
-    toast: document.getElementById('toast')
-  };
-
-  /* ========================================================================
-     1. Utilities & Safe Image Fallback
-     ======================================================================== */
-  function pad2(n) {
-    return String(n).padStart(2, '0');
-  }
-
-  function escapeHtml(str) {
-    return String(str)
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;');
-  }
-
-  function applyImageFallback(img) {
-    if (!img) return;
-    img.onerror = function () {
-      if (this.dataset.fallbackApplied) return;
-      this.dataset.fallbackApplied = '1';
-      this.src = FALLBACK_IMG;
-    };
-  }
-
-  function showToast(message) {
-    if (!el.toast) return;
-    el.toast.textContent = message;
-    el.toast.classList.add('is-visible');
-    clearTimeout(state.toastTimer);
-    state.toastTimer = setTimeout(() => {
-      el.toast.classList.remove('is-visible');
-    }, 2400);
-  }
-
-  function copyEmail() {
-    const email = DATA.brand.email;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard
-        .writeText(email)
-        .then(() => showToast('Email copied to clipboard'))
-        .catch(() => fallbackCopy(email));
-    } else {
-      fallbackCopy(email);
+  const UPDATES = [
+    {
+      date: '2026.11',
+      tag: 'STAGE v2',
+      title: 'Twin Linked 3D Wheel Architecture',
+      desc: 'Rebuilt the primary showcase around a locked 100vh counter-rotating twin-wheel stage with tactile paper grain and 60fps physics.'
+    },
+    {
+      date: '2026.10',
+      tag: 'BOOKING',
+      title: 'Q2’27 Studio Availability Open',
+      desc: 'Accepting two flagship design engineering commissions for Q2’27. Reach out via the Contact drawer.'
+    },
+    {
+      date: '2026.08',
+      tag: 'AWARD',
+      title: 'Kestrel Named Site of the Day',
+      desc: 'Recognized for sub-300ms transitions, kinetic typography, and custom GLSL shader work.'
     }
-  }
+  ];
 
-  function fallbackCopy(text) {
-    const ta = document.createElement('textarea');
-    ta.value = text;
-    ta.setAttribute('readonly', '');
-    ta.style.position = 'fixed';
-    ta.style.opacity = '0';
-    document.body.appendChild(ta);
-    ta.select();
-    try {
-      document.execCommand('copy');
-      showToast('Email copied to clipboard');
-    } catch (_) {
-      showToast(text);
-    }
-    document.body.removeChild(ta);
-  }
+  // State
+  let activeIndex = 0;
+  let targetPos = 0;
+  let currentPos = 0;
+  let presenceEnabled = true;
+  let onlineCount = 124;
+  let wheelCooldown = 0;
+  let touchStartX = 0;
+  let touchStartY = 0;
+  let isDrawerOpen = false;
+  let isCmdkOpen = false;
+  let cmdkSelected = 0;
+  let cmdkItems = [];
+
+  // DOM References
+  const wheelMediaEl = document.getElementById('wheel-media');
+  const wheelBadgesEl = document.getElementById('wheel-badges');
+  const stageEl = document.getElementById('hv2-stage');
+  const counterEl = document.getElementById('stage-counter');
+  const titleEl = document.getElementById('stage-title');
+  const collabEl = document.getElementById('stage-collab');
+  const yearEl = document.getElementById('stage-year');
+  const ctaEl = document.getElementById('stage-cta');
+
+  const chipTime = document.getElementById('chip-time');
+  const chipFps = document.getElementById('chip-fps');
+  const chipOnline = document.getElementById('chip-online');
+  const chipPresence = document.getElementById('chip-presence');
+  const presenceLayer = document.getElementById('presence-layer');
+  const presenceToast = document.getElementById('presence-toast');
+  const toastSub = document.getElementById('toast-sub');
+
+  const drawerBackdrop = document.getElementById('drawer-backdrop');
+  const drawerEl = document.getElementById('drawer');
+  const drawerEyebrow = document.getElementById('drawer-eyebrow');
+  const drawerContent = document.getElementById('drawer-content');
+  const drawerClose = document.getElementById('drawer-close');
+
+  const cmdkBackdrop = document.getElementById('cmdk-backdrop');
+  const cmdkInput = document.getElementById('cmdk-input');
+  const cmdkList = document.getElementById('cmdk-list');
+  const cmdkTrigger = document.getElementById('cmdk-trigger');
+
+  const mediaCards = [];
+  const badgeTiles = [];
 
   /* ========================================================================
-     2. Theme System (Dark Default, localStorage Persisted)
+     1. Build Twin Wheel DOM Nodes
      ======================================================================== */
-  function initTheme() {
-    const saved = localStorage.getItem('mv-theme');
-    const theme = saved === 'light' ? 'light' : 'dark';
-    el.root.setAttribute('data-theme', theme);
-  }
+  function buildWheels() {
+    wheelMediaEl.innerHTML = '';
+    wheelBadgesEl.innerHTML = '';
 
-  function toggleTheme() {
-    const current = el.root.getAttribute('data-theme') || 'dark';
-    const next = current === 'dark' ? 'light' : 'dark';
-    el.root.setAttribute('data-theme', next);
-    localStorage.setItem('mv-theme', next);
-    showToast(`Theme switched to ${next}`);
-  }
+    PROJECTS.forEach((project, idx) => {
+      // Left wheel: Landscape Media Preview Card
+      const card = document.createElement('article');
+      card.className = 'hv2__media-card';
+      card.dataset.index = String(idx);
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.setAttribute('aria-label', `${project.title} — ${project.year}`);
 
-  /* ========================================================================
-     3. Live Telemetry HUD (London Clock, rAF FPS, Performance LCP)
-     ======================================================================== */
-  function initTelemetry() {
-    // Live Europe/London Clock
-    const updateClock = () => {
-      if (!el.hudTime) return;
-      try {
-        const now = new Date();
-        const formatted = new Intl.DateTimeFormat('en-GB', {
-          timeZone: DATA.brand.timezone,
-          hour: '2-digit',
-          minute: '2-digit',
-          hour12: false
-        }).format(now);
-        el.hudTime.textContent = formatted;
-      } catch (_) {
-        const now = new Date();
-        el.hudTime.textContent = `${pad2(now.getHours())}:${pad2(now.getMinutes())}`;
-      }
-    };
-    updateClock();
-    setInterval(updateClock, 15000);
-
-    // Live rAF FPS Counter
-    if (el.hudFps) {
-      let frames = 0;
-      let lastTime = performance.now();
-      const tick = (now) => {
-        frames += 1;
-        if (now - lastTime >= 1000) {
-          const fps = Math.min(120, Math.round((frames * 1000) / (now - lastTime)));
-          el.hudFps.textContent = String(fps);
-          frames = 0;
-          lastTime = now;
-        }
-        requestAnimationFrame(tick);
+      const img = document.createElement('img');
+      img.src = project.image;
+      img.alt = `${project.title} preview`;
+      img.loading = idx < 3 ? 'eager' : 'lazy';
+      img.decoding = 'async';
+      if (project.filter) img.style.filter = project.filter;
+      img.onerror = () => {
+        img.src = DATA.fallbackImage;
       };
-      requestAnimationFrame(tick);
-    }
+      card.appendChild(img);
 
-    // Real LCP / Load Telemetry
-    if (el.hudLcp) {
-      if ('PerformanceObserver' in window) {
-        try {
-          const observer = new PerformanceObserver((list) => {
-            const entries = list.getEntries();
-            const last = entries[entries.length - 1];
-            if (last && last.startTime) {
-              const sec = Math.max(0.1, last.startTime / 1000).toFixed(1);
-              el.hudLcp.textContent = `${sec}s`;
-            }
-          });
-          observer.observe({ type: 'largest-contentful-paint', buffered: true });
-        } catch (_) {
-          el.hudLcp.textContent = '0.3s';
+      card.addEventListener('click', () => {
+        const modActive = mod(activeIndex, TOTAL);
+        if (idx === modActive) {
+          openProjectDrawer(project);
+        } else {
+          goToShortestIndex(idx);
         }
-      } else {
-        el.hudLcp.textContent = '0.3s';
-      }
-    }
+      });
+
+      wheelMediaEl.appendChild(card);
+      mediaCards.push(card);
+
+      // Right wheel: Square Metallic-Bordered Badge Tile
+      const tile = document.createElement('div');
+      tile.className = 'hv2__badge-tile';
+      tile.dataset.index = String(idx);
+      tile.setAttribute('role', 'button');
+      tile.setAttribute('tabindex', '0');
+      tile.setAttribute('aria-label', `${project.title} emblem`);
+
+      const inner = document.createElement('div');
+      inner.className = 'hv2__badge-inner';
+      inner.innerHTML = `
+        ${BADGE_EMBLEMS[idx % BADGE_EMBLEMS.length]}
+        <span class="hv2__badge-code">N°${project.index}</span>
+      `;
+      tile.appendChild(inner);
+
+      tile.addEventListener('click', () => {
+        const modActive = mod(activeIndex, TOTAL);
+        if (idx === modActive) {
+          openProjectDrawer(project);
+        } else {
+          goToShortestIndex(idx);
+        }
+      });
+
+      wheelBadgesEl.appendChild(tile);
+      badgeTiles.push(tile);
+    });
   }
 
   /* ========================================================================
-     4. Interactive Stage (.hv2__stage)
+     2. Circular Math & Twin-Wheel 3D Arc Positioning
      ======================================================================== */
-  function renderStage(direction) {
-    const total = STAGE_PROJECTS.length;
-    const current = STAGE_PROJECTS[state.stageIndex];
-    const prev = STAGE_PROJECTS[(state.stageIndex - 1 + total) % total];
-    const next = STAGE_PROJECTS[(state.stageIndex + 1) % total];
+  function mod(n, m) {
+    return ((n % m) + m) % m;
+  }
 
-    const counterText = `${pad2(state.stageIndex + 1)} / ${pad2(total)}`;
-    if (el.stageCounter) el.stageCounter.textContent = `${counterText} — SELECTED WORK`;
-    if (el.stageFooterCounter) el.stageFooterCounter.textContent = `${pad2(state.stageIndex + 1)} — ${pad2(total)}`;
+  function shortestDelta(fromPos, idx) {
+    let diff = idx - mod(fromPos, TOTAL);
+    if (diff > TOTAL / 2) diff -= TOTAL;
+    if (diff < -TOTAL / 2) diff += TOTAL;
+    return diff;
+  }
 
-    const applyContent = () => {
-      if (el.stageImg) {
-        el.stageImg.src = current.image;
-        el.stageImg.alt = `${current.title} — ${current.category}`;
-        el.stageImg.style.filter = current.filter || 'none';
-      }
-      if (el.stageImgRight) {
-        el.stageImgRight.src = current.secondaryImage || next.image;
-        el.stageImgRight.alt = `${current.title} — Secondary Frame`;
-        el.stageImgRight.style.filter = current.filter || 'none';
-      }
-      if (el.stageLeftCaption) el.stageLeftCaption.textContent = `${current.index} / FIG. A`;
-      if (el.stageRightCaption) el.stageRightCaption.textContent = `${current.index} / FIG. B`;
-      if (el.stageTitle) el.stageTitle.textContent = current.title;
-      if (el.stageCollab) el.stageCollab.textContent = current.collaborator;
-      if (el.stageYear) el.stageYear.textContent = current.year;
+  function goToShortestIndex(targetIdx) {
+    const diff = shortestDelta(targetPos, targetIdx);
+    stepTo(targetPos + diff);
+  }
 
-      if (el.stagePrevImg) {
-        el.stagePrevImg.src = prev.image;
-        el.stagePrevImg.alt = prev.title;
-        el.stagePrevImg.style.filter = prev.filter || 'none';
-      }
-      if (el.stageNextImg) {
-        el.stageNextImg.src = next.image;
-        el.stageNextImg.alt = next.title;
-        el.stageNextImg.style.filter = next.filter || 'none';
-      }
-    };
+  function stepBy(delta) {
+    stepTo(targetPos + delta);
+  }
 
-    if (!direction) {
-      applyContent();
-      return;
+  function stepTo(newTarget) {
+    const prevIdx = mod(Math.round(targetPos), TOTAL);
+    targetPos = Math.round(newTarget);
+    const nextIdx = mod(targetPos, TOTAL);
+    const dir = targetPos > activeIndex ? 1 : -1;
+    activeIndex = targetPos;
+    if (prevIdx !== nextIdx) {
+      updateCenterMetadata(PROJECTS[nextIdx], dir);
     }
+  }
 
-    state.isSwitching = true;
-    const outClass = direction > 0 ? 'is-out-up' : 'is-out-down';
-    const inClass = direction > 0 ? 'is-out-down' : 'is-out-up';
+  function updateCenterMetadata(project, direction) {
+    counterEl.textContent = `N°${project.index} / ${String(TOTAL).padStart(2, '0')}`;
+    collabEl.textContent = project.collaborator.toUpperCase();
+    yearEl.textContent = project.year;
 
-    el.stageFrame?.classList.add('is-switching');
-    el.stageFrameRight?.classList.add('is-switching');
-    el.stageTitle?.classList.add(outClass);
-
+    // Smooth drum-roll title transition
+    const outClass = direction >= 0 ? 'is-rolling-out-up' : 'is-rolling-out-down';
+    titleEl.classList.add(outClass);
     setTimeout(() => {
-      applyContent();
-      el.stageTitle?.classList.remove(outClass);
-      el.stageTitle?.classList.add(inClass);
-
-      requestAnimationFrame(() => {
-        requestAnimationFrame(() => {
-          el.stageFrame?.classList.remove('is-switching');
-          el.stageFrameRight?.classList.remove('is-switching');
-          el.stageTitle?.classList.remove(inClass);
-          state.isSwitching = false;
-        });
-      });
-    }, 180);
+      titleEl.textContent = project.title;
+      titleEl.classList.remove('is-rolling-out-up', 'is-rolling-out-down');
+    }, 140);
   }
 
-  function stepStage(delta) {
-    if (state.isSwitching) return;
-    const total = STAGE_PROJECTS.length;
-    state.stageIndex = (state.stageIndex + delta + total) % total;
-    renderStage(delta);
-  }
+  function layoutWheels(pos) {
+    const isMobile = window.innerWidth <= 900;
+    const activeMod = mod(Math.round(pos), TOTAL);
 
-  function initStageInteractions() {
-    applyImageFallback(el.stageImg);
-    applyImageFallback(el.stageImgRight);
-    applyImageFallback(el.stagePrevImg);
-    applyImageFallback(el.stageNextImg);
+    for (let i = 0; i < TOTAL; i++) {
+      const offset = shortestDelta(pos, i);
+      const absOff = Math.abs(offset);
+      const visible = absOff <= 3.2;
 
-    el.stagePrevCard?.addEventListener('click', () => stepStage(-1));
-    el.stageNextCard?.addEventListener('click', () => stepStage(1));
-    el.stagePrevBtn?.addEventListener('click', () => stepStage(-1));
-    el.stageNextBtn?.addEventListener('click', () => stepStage(1));
+      const card = mediaCards[i];
+      const tile = badgeTiles[i];
 
-    el.stageViewBtn?.addEventListener('click', () => {
-      openProjectDrawer(STAGE_PROJECTS[state.stageIndex]);
-    });
-
-    el.stageFrameRight?.addEventListener('click', () => {
-      openProjectDrawer(STAGE_PROJECTS[state.stageIndex]);
-    });
-
-    // Click or drag/swipe on centerpiece frame
-    let startX = 0;
-    let isPointerDown = false;
-
-    el.stageFrame?.addEventListener('pointerdown', (e) => {
-      isPointerDown = true;
-      startX = e.clientX;
-    });
-
-    el.stageFrame?.addEventListener('pointerup', (e) => {
-      if (!isPointerDown) return;
-      isPointerDown = false;
-      const diff = e.clientX - startX;
-      if (Math.abs(diff) > 36) {
-        stepStage(diff < 0 ? 1 : -1);
-      } else {
-        stepStage(1);
+      if (!visible) {
+        card.style.opacity = '0';
+        card.style.pointerEvents = 'none';
+        tile.style.opacity = '0';
+        tile.style.pointerEvents = 'none';
+        continue;
       }
-    });
 
-    el.stageFrame?.addEventListener('pointercancel', () => {
-      isPointerDown = false;
-    });
-  }
+      const opacity = Math.max(0, 1 - absOff * 0.34);
+      const scale = Math.max(0.72, 1 - absOff * 0.11);
+      const zIndex = Math.round(20 - absOff * 5);
 
-  /* ========================================================================
-     5. Classic Selected Work Index (.hv2__classic) & Floating Preview
-     ======================================================================== */
-  function renderClassicIndex() {
-    if (!el.classicList) return;
-    applyImageFallback(el.hoverPreviewImg);
+      card.classList.toggle('is-active', i === activeMod);
+      tile.classList.toggle('is-active', i === activeMod);
+      card.style.zIndex = String(zIndex);
+      tile.style.zIndex = String(zIndex);
+      card.style.opacity = String(opacity);
+      tile.style.opacity = String(opacity);
+      card.style.pointerEvents = absOff < 2.2 ? 'auto' : 'none';
+      tile.style.pointerEvents = absOff < 2.2 ? 'auto' : 'none';
 
-    const html = ALL_PROJECTS.map(
-      (p) => `
-      <li class="row">
-        <button type="button" class="row__btn" data-project-id="${escapeHtml(p.id)}">
-          <span class="row__index">${escapeHtml(p.index)}</span>
-          <span class="row__title">${escapeHtml(p.title)}</span>
-          <span class="row__rule" aria-hidden="true"></span>
-          <span class="row__meta">
-            <span class="chip">${escapeHtml(p.collaborator)}</span>
-            <span class="chip chip--year">${escapeHtml(p.year)}</span>
-          </span>
-        </button>
-      </li>`
-    ).join('');
+      if (!isMobile) {
+        // Desktop: Vertical opposing circular arcs
+        // Left wheel: curves up-left (+24deg) and down-left (-24deg)
+        const angleDeg = offset * 24;
+        const angleRad = (angleDeg * Math.PI) / 180;
+        const radiusMedia = Math.min(window.innerHeight * 0.72, 620);
+        const xMedia = (Math.cos(angleRad) - 1) * radiusMedia * 0.62;
+        const yMedia = Math.sin(angleRad) * radiusMedia;
+        const rotZMedia = -angleDeg;
 
-    el.classicList.innerHTML = html;
+        card.style.transform = `translate3d(${xMedia.toFixed(1)}px, ${yMedia.toFixed(1)}px, ${(-absOff * 60).toFixed(1)}px) rotateY(8deg) rotateZ(${rotZMedia.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
 
-    const buttons = el.classicList.querySelectorAll('.row__btn');
-    buttons.forEach((btn) => {
-      const project = ALL_PROJECTS.find((p) => p.id === btn.dataset.projectId);
-      if (!project) return;
+        // Right wheel: counter-rotating opposing arc
+        const badgeAngleDeg = -offset * 24;
+        const badgeRad = (badgeAngleDeg * Math.PI) / 180;
+        const radiusBadge = Math.min(window.innerHeight * 0.56, 470);
+        const xBadge = (1 - Math.cos(badgeRad)) * radiusBadge * 0.58;
+        const yBadge = Math.sin(badgeRad) * radiusBadge;
+        const rotZBadge = badgeAngleDeg;
 
-      btn.addEventListener('click', () => openProjectDrawer(project));
+        tile.style.transform = `translate3d(${xBadge.toFixed(1)}px, ${yBadge.toFixed(1)}px, ${(-absOff * 50).toFixed(1)}px) rotateY(-10deg) rotateZ(${rotZBadge.toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+      } else {
+        // Mobile: Upper horizontal arc (media) + Lower horizontal arc (badges)
+        const angleDeg = offset * 22;
+        const angleRad = (angleDeg * Math.PI) / 180;
+        const rMobMedia = Math.min(window.innerWidth * 0.92, 420);
+        const xMedia = Math.sin(angleRad) * rMobMedia;
+        const yMedia = (1 - Math.cos(angleRad)) * 90;
 
-      btn.addEventListener('mouseenter', () => {
-        if (!el.hoverPreview || !el.hoverPreviewImg) return;
-        el.hoverPreviewImg.src = project.image;
-        el.hoverPreviewImg.alt = project.title;
-        el.hoverPreviewImg.style.filter = project.filter || 'none';
-        el.hoverPreview.classList.add('is-visible');
-      });
+        card.style.transform = `translate3d(${xMedia.toFixed(1)}px, ${yMedia.toFixed(1)}px, 0px) rotateZ(${(angleDeg * 0.45).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
 
-      btn.addEventListener('mousemove', (e) => {
-        if (!el.hoverPreview) return;
-        const x = Math.min(window.innerWidth - 280, e.clientX + 24);
-        const y = Math.max(96, Math.min(window.innerHeight - 190, e.clientY - 80));
-        el.hoverPreview.style.transform = `translate3d(${x}px, ${y}px, 0) scale(1)`;
-      });
+        const rMobBadge = Math.min(window.innerWidth * 0.55, 250);
+        const xBadge = Math.sin(-angleRad) * rMobBadge;
+        const yBadge = (Math.cos(angleRad) - 1) * 55;
 
-      btn.addEventListener('mouseleave', () => {
-        if (!el.hoverPreview) return;
-        el.hoverPreview.classList.remove('is-visible');
-      });
-    });
-  }
-
-  /* ========================================================================
-     6. Slide-Over Drawers (Project, About, Lab, Writing, Studio, Contact)
-     ======================================================================== */
-  function openDrawer(eyebrow, bodyHtml) {
-    if (!el.drawer || !el.drawerBackdrop) return;
-    el.drawerEyebrow.textContent = eyebrow;
-    el.drawerBody.innerHTML = bodyHtml;
-
-    el.drawerBody.querySelectorAll('img').forEach(applyImageFallback);
-    const copyBtn = el.drawerBody.querySelector('[data-copy-email]');
-    if (copyBtn) {
-      copyBtn.addEventListener('click', copyEmail);
-    }
-
-    state.drawerOpen = true;
-    el.drawerBackdrop.classList.add('is-open');
-    el.drawer.classList.add('is-open');
-    el.drawer.setAttribute('aria-hidden', 'false');
-    el.body.classList.add('is-locked');
-    el.drawerClose?.focus();
-  }
-
-  function closeDrawer() {
-    if (!state.drawerOpen) return;
-    state.drawerOpen = false;
-    el.drawerBackdrop.classList.remove('is-open');
-    el.drawer.classList.remove('is-open');
-    el.drawer.setAttribute('aria-hidden', 'true');
-    if (!state.cmdOpen) el.body.classList.remove('is-locked');
-  }
-
-  function openProjectDrawer(project) {
-    const html = `
-      <div class="drawer__hero">
-        <img src="${escapeHtml(project.image)}" alt="${escapeHtml(project.title)}" style="filter:${escapeHtml(project.filter || 'none')}">
-      </div>
-      <h2 class="drawer__title">${escapeHtml(project.title)}</h2>
-      <p class="drawer__lead">${escapeHtml(project.summary)}</p>
-
-      <div class="drawer__specs">
-        <div>
-          <span class="spec__label">Collaborator</span>
-          <span class="spec__value">${escapeHtml(project.collaborator)}</span>
-        </div>
-        <div>
-          <span class="spec__label">Year</span>
-          <span class="spec__value">${escapeHtml(project.year)}</span>
-        </div>
-        <div>
-          <span class="spec__label">Role</span>
-          <span class="spec__value">${escapeHtml(project.role)}</span>
-        </div>
-        <div>
-          <span class="spec__label">Discipline</span>
-          <span class="spec__value">${escapeHtml(project.category)}</span>
-        </div>
-      </div>
-
-      <div class="drawer__section">
-        <h3 class="drawer__section-title">Deliverables</h3>
-        <div class="chip-list">
-          ${project.deliverables.map((d) => `<span class="chip">${escapeHtml(d)}</span>`).join('')}
-        </div>
-      </div>
-
-      <div class="drawer__section">
-        <h3 class="drawer__section-title">Stack</h3>
-        <div class="chip-list">
-          ${project.stack.map((s) => `<span class="chip">${escapeHtml(s)}</span>`).join('')}
-        </div>
-      </div>
-
-      <div class="drawer__section">
-        <a href="${escapeHtml(project.url)}" target="_blank" rel="noopener noreferrer" class="btn btn--primary">
-          Visit live site ↗
-        </a>
-      </div>
-    `;
-    openDrawer(`PROJECT :: ${project.index} / 12`, html);
-  }
-
-  function openSectionDrawer(section) {
-    if (section === 'about') {
-      const a = DATA.about;
-      openDrawer(
-        'ABOUT :: MARCUS VANCE',
-        `
-        <h2 class="drawer__title">Creative Developer &amp; Brand Engineer</h2>
-        <p class="drawer__lead">${escapeHtml(a.intro)}</p>
-        <p class="drawer__lead">${escapeHtml(a.philosophy)}</p>
-
-        <div class="drawer__section">
-          <h3 class="drawer__section-title">Capabilities</h3>
-          <ul class="editorial-list">
-            ${a.capabilities.map((c) => `<li><p class="editorial-item__title">${escapeHtml(c)}</p></li>`).join('')}
-          </ul>
-        </div>
-
-        <div class="drawer__section">
-          <h3 class="drawer__section-title">Recognition</h3>
-          <ul class="editorial-list">
-            ${a.recognition
-              .map(
-                (r) => `
-              <li>
-                <div class="editorial-item__head">
-                  <p class="editorial-item__title">${escapeHtml(r.label)}</p>
-                  <span class="editorial-item__meta">${escapeHtml(r.detail)}</span>
-                </div>
-              </li>`
-              )
-              .join('')}
-          </ul>
-        </div>
-
-        <div class="drawer__section">
-          <h3 class="drawer__section-title">Selected Partners</h3>
-          <div class="chip-list">
-            ${a.clients.map((c) => `<span class="chip">${escapeHtml(c)}</span>`).join('')}
-          </div>
-        </div>
-      `
-      );
-      return;
-    }
-
-    if (section === 'lab') {
-      openDrawer(
-        'LAB :: EXPERIMENTS',
-        `
-        <h2 class="drawer__title">Interaction &amp; Shader Studies</h2>
-        <p class="drawer__lead">Small technical studies exploring tactile web surfaces, zero-dependency motion, and keyboard-first interfaces.</p>
-        <ul class="editorial-list">
-          ${DATA.lab
-            .map(
-              (item) => `
-            <li>
-              <div class="editorial-item__head">
-                <h3 class="editorial-item__title">${escapeHtml(item.title)}</h3>
-                <span class="editorial-item__meta">${escapeHtml(item.code)} · ${escapeHtml(item.status)}</span>
-              </div>
-              <p class="editorial-item__desc">${escapeHtml(item.description)}</p>
-            </li>`
-            )
-            .join('')}
-        </ul>
-      `
-      );
-      return;
-    }
-
-    if (section === 'writing') {
-      openDrawer(
-        'WRITING :: NOTES',
-        `
-        <h2 class="drawer__title">Essays &amp; Field Notes</h2>
-        <p class="drawer__lead">Short notes on editorial restraint, tactile front-end engineering, and building software that respects attention.</p>
-        <ul class="editorial-list">
-          ${DATA.writing
-            .map(
-              (post) => `
-            <li>
-              <div class="editorial-item__head">
-                <h3 class="editorial-item__title">${escapeHtml(post.title)}</h3>
-                <span class="editorial-item__meta">${escapeHtml(post.date)} · ${escapeHtml(post.readTime)}</span>
-              </div>
-              <p class="editorial-item__desc">${escapeHtml(post.excerpt)}</p>
-            </li>`
-            )
-            .join('')}
-        </ul>
-      `
-      );
-      return;
-    }
-
-    if (section === 'studio') {
-      const s = DATA.studio;
-      openDrawer(
-        'STUDIO :: VANCE STUDIO',
-        `
-        <h2 class="drawer__title">${escapeHtml(s.name)}</h2>
-        <p class="drawer__lead">${escapeHtml(s.lead)}</p>
-        <p class="drawer__lead">${escapeHtml(s.description)}</p>
-
-        <div class="drawer__section">
-          <h3 class="drawer__section-title">Engagement Models</h3>
-          <ul class="editorial-list">
-            ${s.engagements
-              .map(
-                (eng) => `
-              <li>
-                <div class="editorial-item__head">
-                  <h3 class="editorial-item__title">${escapeHtml(eng.title)}</h3>
-                  <span class="editorial-item__meta">${escapeHtml(eng.timeline)}</span>
-                </div>
-                <p class="editorial-item__desc">${escapeHtml(eng.detail)}</p>
-              </li>`
-              )
-              .join('')}
-          </ul>
-        </div>
-      `
-      );
-      return;
-    }
-
-    if (section === 'contact') {
-      const c = DATA.contact;
-      openDrawer(
-        `CONTACT :: BOOKING ${c.booking}`,
-        `
-        <h2 class="drawer__title">Start a Conversation</h2>
-        <p class="drawer__lead">Currently booking select digital flagship and design engineering engagements for ${escapeHtml(c.booking)}. Based in ${escapeHtml(c.location)}.</p>
-
-        <div class="contact-email-box">
-          <code>${escapeHtml(c.email)}</code>
-          <button type="button" class="btn btn--primary" data-copy-email>Copy email</button>
-        </div>
-
-        <div class="drawer__section">
-          <h3 class="drawer__section-title">Elsewhere</h3>
-          <ul class="editorial-list">
-            ${c.socials
-              .map(
-                (s) => `
-              <li>
-                <a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" class="editorial-item__head">
-                  <span class="editorial-item__title">${escapeHtml(s.label)}</span>
-                  <span class="editorial-item__meta">${escapeHtml(s.handle)} ↗</span>
-                </a>
-              </li>`
-              )
-              .join('')}
-          </ul>
-        </div>
-      `
-      );
+        tile.style.transform = `translate3d(${xBadge.toFixed(1)}px, ${yBadge.toFixed(1)}px, 0px) rotateZ(${(-angleDeg * 0.5).toFixed(2)}deg) scale(${scale.toFixed(3)})`;
+      }
     }
   }
 
   /* ========================================================================
-     7. Command Palette (⌘K / Ctrl+K)
+     3. Input Controls (Wheel, Touch Drag, Keyboard)
      ======================================================================== */
-  function buildCommandItems() {
-    const projectItems = ALL_PROJECTS.map((p) => ({
-      id: `proj-${p.id}`,
-      label: p.title,
-      type: `Project · ${p.year}`,
-      keywords: `${p.title} ${p.collaborator} ${p.category} ${p.year}`.toLowerCase(),
-      action: () => openProjectDrawer(p)
-    }));
+  function bindStageControls() {
+    window.addEventListener(
+      'wheel',
+      (e) => {
+        if (isDrawerOpen || isCmdkOpen) return;
+        e.preventDefault();
+        const now = performance.now();
+        if (now - wheelCooldown < 160) return;
+        const delta = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
+        if (Math.abs(delta) < 8) return;
+        wheelCooldown = now;
+        stepBy(delta > 0 ? 1 : -1);
+      },
+      { passive: false }
+    );
 
-    const navItems = [
-      { id: 'nav-about', label: 'About Marcus Vance', type: 'Section', keywords: 'about bio capabilities', action: () => openSectionDrawer('about') },
-      { id: 'nav-lab', label: 'Lab Experiments', type: 'Section', keywords: 'lab webgl shaders experiments', action: () => openSectionDrawer('lab') },
-      { id: 'nav-writing', label: 'Writing & Essays', type: 'Section', keywords: 'writing essays notes articles', action: () => openSectionDrawer('writing') },
-      { id: 'nav-studio', label: 'Vance Studio', type: 'Section', keywords: 'studio engagements work', action: () => openSectionDrawer('studio') },
-      { id: 'nav-contact', label: 'Contact & Booking', type: 'Section', keywords: 'contact email booking', action: () => openSectionDrawer('contact') }
-    ];
+    stageEl.addEventListener(
+      'touchstart',
+      (e) => {
+        if (isDrawerOpen || isCmdkOpen) return;
+        touchStartX = e.touches[0].clientX;
+        touchStartY = e.touches[0].clientY;
+      },
+      { passive: true }
+    );
 
-    const actionItems = [
-      { id: 'act-theme', label: 'Toggle Dark / Light Theme', type: 'Action', keywords: 'theme dark light mode', action: toggleTheme },
-      { id: 'act-email', label: 'Copy Contact Email', type: 'Action', keywords: 'copy email hello@marcusvance.studio', action: copyEmail }
-    ];
+    stageEl.addEventListener(
+      'touchend',
+      (e) => {
+        if (isDrawerOpen || isCmdkOpen) return;
+        const dx = e.changedTouches[0].clientX - touchStartX;
+        const dy = e.changedTouches[0].clientY - touchStartY;
+        const primary = Math.abs(dx) > Math.abs(dy) ? dx : dy;
+        if (Math.abs(primary) > 36) {
+          stepBy(primary < 0 ? 1 : -1);
+        }
+      },
+      { passive: true }
+    );
 
-    return [...navItems, ...actionItems, ...projectItems];
-  }
-
-  const CMD_ITEMS = buildCommandItems();
-
-  function renderCommandList(query) {
-    const q = (query || '').trim().toLowerCase();
-    state.cmdFiltered = q
-      ? CMD_ITEMS.filter((item) => item.label.toLowerCase().includes(q) || item.keywords.includes(q))
-      : CMD_ITEMS;
-    state.cmdActiveIndex = 0;
-
-    if (!state.cmdFiltered.length) {
-      el.cmdList.innerHTML = `<li class="cmd__empty">No matching commands or projects.</li>`;
-      return;
-    }
-
-    el.cmdList.innerHTML = state.cmdFiltered
-      .map(
-        (item, idx) => `
-      <li>
-        <button type="button" class="cmd__option" role="option" data-cmd-idx="${idx}" aria-selected="${idx === 0 ? 'true' : 'false'}">
-          <span>${escapeHtml(item.label)}</span>
-          <span class="cmd__option-type">${escapeHtml(item.type)}</span>
-        </button>
-      </li>`
-      )
-      .join('');
-
-    el.cmdList.querySelectorAll('.cmd__option').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const idx = Number(btn.dataset.cmdIdx);
-        executeCommand(idx);
-      });
-    });
-  }
-
-  function updateCommandSelection() {
-    const options = el.cmdList.querySelectorAll('.cmd__option');
-    options.forEach((opt, i) => {
-      const active = i === state.cmdActiveIndex;
-      opt.setAttribute('aria-selected', active ? 'true' : 'false');
-      if (active) opt.scrollIntoView({ block: 'nearest' });
-    });
-  }
-
-  function executeCommand(idx) {
-    const item = state.cmdFiltered[idx];
-    if (!item) return;
-    closeCommandPalette();
-    item.action();
-  }
-
-  function openCommandPalette() {
-    state.cmdOpen = true;
-    el.cmd.classList.add('is-open');
-    el.cmd.setAttribute('aria-hidden', 'false');
-    el.body.classList.add('is-locked');
-    el.cmdInput.value = '';
-    renderCommandList('');
-    setTimeout(() => el.cmdInput.focus(), 20);
-  }
-
-  function closeCommandPalette() {
-    if (!state.cmdOpen) return;
-    state.cmdOpen = false;
-    el.cmd.classList.remove('is-open');
-    el.cmd.setAttribute('aria-hidden', 'true');
-    if (!state.drawerOpen) el.body.classList.remove('is-locked');
-  }
-
-  /* ========================================================================
-     8. Global Event Listeners & Init
-     ======================================================================== */
-  function bindEvents() {
-    el.themeToggle?.addEventListener('click', toggleTheme);
-    el.cmdTrigger?.addEventListener('click', openCommandPalette);
-    el.drawerClose?.addEventListener('click', closeDrawer);
-    el.drawerBackdrop?.addEventListener('click', closeDrawer);
-
-    document.querySelectorAll('[data-drawer]').forEach((trigger) => {
-      trigger.addEventListener('click', () => {
-        openSectionDrawer(trigger.dataset.drawer);
-      });
-    });
-
-    el.cmd?.addEventListener('click', (e) => {
-      if (e.target === el.cmd) closeCommandPalette();
-    });
-
-    el.cmdInput?.addEventListener('input', (e) => {
-      renderCommandList(e.target.value);
-    });
-
-    document.addEventListener('keydown', (e) => {
+    window.addEventListener('keydown', (e) => {
       if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
         e.preventDefault();
-        if (state.cmdOpen) closeCommandPalette();
-        else openCommandPalette();
+        toggleCmdk();
         return;
       }
 
       if (e.key === 'Escape') {
-        if (state.cmdOpen) {
-          closeCommandPalette();
-          return;
-        }
-        if (state.drawerOpen) {
-          closeDrawer();
-          return;
-        }
+        if (isCmdkOpen) closeCmdk();
+        else if (isDrawerOpen) closeDrawer();
+        return;
       }
 
-      if (state.cmdOpen) {
+      if (isCmdkOpen) {
         if (e.key === 'ArrowDown') {
           e.preventDefault();
-          if (state.cmdFiltered.length) {
-            state.cmdActiveIndex = (state.cmdActiveIndex + 1) % state.cmdFiltered.length;
-            updateCommandSelection();
-          }
+          moveCmdkSelection(1);
         } else if (e.key === 'ArrowUp') {
           e.preventDefault();
-          if (state.cmdFiltered.length) {
-            state.cmdActiveIndex = (state.cmdActiveIndex - 1 + state.cmdFiltered.length) % state.cmdFiltered.length;
-            updateCommandSelection();
-          }
+          moveCmdkSelection(-1);
         } else if (e.key === 'Enter') {
           e.preventDefault();
-          executeCommand(state.cmdActiveIndex);
+          runCmdkSelection();
         }
         return;
       }
 
-      if (!state.drawerOpen) {
-        if (e.key === 'ArrowRight') stepStage(1);
-        if (e.key === 'ArrowLeft') stepStage(-1);
+      if (isDrawerOpen) return;
+
+      if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+        e.preventDefault();
+        stepBy(1);
+      } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+        e.preventDefault();
+        stepBy(-1);
+      } else if (e.key === 'Enter') {
+        openProjectDrawer(PROJECTS[mod(activeIndex, TOTAL)]);
       }
+    });
+
+    ctaEl.addEventListener('click', () => {
+      openProjectDrawer(PROJECTS[mod(activeIndex, TOTAL)]);
+    });
+
+    document.getElementById('brand-home').addEventListener('click', (e) => {
+      e.preventDefault();
+      goToShortestIndex(0);
     });
   }
 
-  function init() {
-    initTheme();
-    initTelemetry();
-    renderStage(0);
-    initStageInteractions();
-    renderClassicIndex();
-    bindEvents();
+  /* ========================================================================
+     4. Live Presence Cursors & Telemetry
+     ======================================================================== */
+  const PEERS = [
+    { name: 'calm fox', color: '#4f9cf9', x: 0.22, y: 0.28, vx: 0.00018, vy: 0.00013, phase: 0.4 },
+    { name: 'swift owl', color: '#38bdf8', x: 0.74, y: 0.24, vx: 0.00015, vy: 0.00019, phase: 2.1 },
+    { name: 'keen koi', color: '#a78bfa', x: 0.68, y: 0.78, vx: 0.00014, vy: 0.00016, phase: 4.0 }
+  ];
+
+  function initPresenceCursors() {
+    presenceLayer.innerHTML = '';
+    PEERS.forEach((peer) => {
+      const el = document.createElement('div');
+      el.className = 'peer-cursor';
+      el.innerHTML = `
+        <svg class="peer-cursor__arrow" viewBox="0 0 16 16" fill="${peer.color}" stroke="#0e1116" stroke-width="1.2">
+          <path d="M2 1.5L13.5 7.2L8.2 8.8L6.2 14L2 1.5Z"/>
+        </svg>
+        <span class="peer-cursor__tag" style="background:${peer.color}">${peer.name}</span>
+      `;
+      presenceLayer.appendChild(el);
+      peer.el = el;
+    });
+
+    chipPresence.addEventListener('click', () => {
+      presenceEnabled = !presenceEnabled;
+      chipPresence.textContent = presenceEnabled ? 'PRESENCE::ON' : 'PRESENCE::OFF';
+      chipPresence.setAttribute('aria-pressed', String(presenceEnabled));
+      presenceLayer.classList.toggle('is-hidden', !presenceEnabled);
+      presenceToast.classList.toggle('is-hidden', !presenceEnabled);
+    });
   }
 
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
-  } else {
-    init();
+  function updatePeerCursors(time) {
+    if (!presenceEnabled) return;
+    const w = window.innerWidth;
+    const h = window.innerHeight;
+    PEERS.forEach((p) => {
+      if (!p.el) return;
+      const px = (p.x + Math.sin(time * p.vx + p.phase) * 0.09) * w;
+      const py = (p.y + Math.cos(time * p.vy + p.phase * 1.3) * 0.08) * h;
+      p.el.style.transform = `translate3d(${px.toFixed(1)}px, ${py.toFixed(1)}px, 0)`;
+    });
   }
+
+  function startTelemetry() {
+    // Live London Time
+    function updateClock() {
+      try {
+        const now = new Date();
+        const fmt = new Intl.DateTimeFormat('en-GB', {
+          timeZone: 'Europe/London',
+          hour: '2-digit',
+          minute: '2-digit',
+          hour12: false
+        }).format(now);
+        chipTime.textContent = `LDN::${fmt}GMT`;
+      } catch {
+        chipTime.textContent = 'LDN::12:00GMT';
+      }
+    }
+    updateClock();
+    setInterval(updateClock, 15000);
+
+    // Subtle online count fluctuation
+    setInterval(() => {
+      const delta = Math.random() > 0.5 ? 1 : -1;
+      onlineCount = Math.max(116, Math.min(138, onlineCount + delta));
+      chipOnline.textContent = `ONLINE::${onlineCount}`;
+      toastSub.textContent = `${onlineCount} online`;
+    }, 6500);
+  }
+
+  /* ========================================================================
+     5. Theme Toggle (Dark #141619 / Light #e4e6e9)
+     ======================================================================== */
+  function initTheme() {
+    const saved = localStorage.getItem('mv-theme');
+    const initial = saved === 'light' ? 'light' : 'dark';
+    applyTheme(initial);
+
+    document.querySelectorAll('[data-theme-set]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        applyTheme(btn.getAttribute('data-theme-set'));
+      });
+    });
+  }
+
+  function applyTheme(theme) {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('mv-theme', theme);
+    document.querySelectorAll('[data-theme-set]').forEach((btn) => {
+      const active = btn.getAttribute('data-theme-set') === theme;
+      btn.classList.toggle('is-active', active);
+      btn.setAttribute('aria-pressed', String(active));
+    });
+  }
+
+  /* ========================================================================
+     6. Slide-Over Drawers
+     ======================================================================== */
+  function openDrawer(eyebrow, html) {
+    drawerEyebrow.textContent = eyebrow;
+    drawerContent.innerHTML = html;
+    drawerBackdrop.hidden = false;
+    drawerEl.hidden = false;
+    isDrawerOpen = true;
+    requestAnimationFrame(() => {
+      drawerBackdrop.classList.add('is-open');
+      drawerEl.classList.add('is-open');
+    });
+  }
+
+  function closeDrawer() {
+    isDrawerOpen = false;
+    drawerBackdrop.classList.remove('is-open');
+    drawerEl.classList.remove('is-open');
+    setTimeout(() => {
+      if (!isDrawerOpen) {
+        drawerBackdrop.hidden = true;
+        drawerEl.hidden = true;
+      }
+    }, 300);
+  }
+
+  function openProjectDrawer(project) {
+    openDrawer(
+      `PROJECT N°${project.index} / ${project.year}`,
+      `
+        <img class="drawer__hero-img" src="${project.image}" alt="${project.title}" />
+        <h2 class="drawer__title" id="drawer-title">${project.title}</h2>
+        <p class="drawer__lead">${project.summary}</p>
+        <div class="drawer__meta-grid">
+          <div class="drawer__meta-box">
+            <span class="drawer__meta-label">Collaborator</span>
+            <span class="drawer__meta-val">${project.collaborator}</span>
+          </div>
+          <div class="drawer__meta-box">
+            <span class="drawer__meta-label">Role</span>
+            <span class="drawer__meta-val">${project.role}</span>
+          </div>
+          <div class="drawer__meta-box">
+            <span class="drawer__meta-label">Category</span>
+            <span class="drawer__meta-val">${project.category}</span>
+          </div>
+          <div class="drawer__meta-box">
+            <span class="drawer__meta-label">Year</span>
+            <span class="drawer__meta-val">${project.year}</span>
+          </div>
+        </div>
+        <div>
+          <span class="drawer__meta-label" style="margin-bottom:8px;">Deliverables &amp; Stack</span>
+          <div class="drawer__chips">
+            ${project.deliverables.map((d) => `<span class="drawer__chip">${d}</span>`).join('')}
+            ${project.stack.map((s) => `<span class="drawer__chip">${s}</span>`).join('')}
+          </div>
+        </div>
+        <a class="drawer__cta-link" href="${project.url}" target="_blank" rel="noopener noreferrer">
+          Visit live site ↗
+        </a>
+      `
+    );
+  }
+
+  function openSectionDrawer(key) {
+    if (key === 'about') {
+      const a = DATA.about;
+      openDrawer(
+        'ABOUT :: MARCUS VANCE',
+        `
+          <h2 class="drawer__title" id="drawer-title">Marcus Vance</h2>
+          <p class="drawer__lead">${a.intro}</p>
+          <p class="drawer__lead">${a.philosophy}</p>
+          <div class="drawer__chips">
+            ${a.capabilities.map((c) => `<span class="drawer__chip">${c}</span>`).join('')}
+          </div>
+          ${a.recognition
+            .map(
+              (r) => `
+            <div class="drawer__card">
+              <div class="drawer__card-top"><span>${r.label}</span><span>RECOGNITION</span></div>
+              <div class="drawer__card-desc">${r.detail}</div>
+            </div>
+          `
+            )
+            .join('')}
+        `
+      );
+    } else if (key === 'lab') {
+      openDrawer(
+        'LAB :: EXPERIMENTS',
+        `
+          <h2 class="drawer__title" id="drawer-title">Interaction Lab</h2>
+          <p class="drawer__lead">Small optical, motion, and performance studies engineered in vanilla web standards.</p>
+          ${DATA.lab
+            .map(
+              (item) => `
+            <div class="drawer__card">
+              <div class="drawer__card-top"><span>${item.code}</span><span>${item.status} · ${item.year}</span></div>
+              <div class="drawer__card-title">${item.title}</div>
+              <div class="drawer__card-desc">${item.description}</div>
+            </div>
+          `
+            )
+            .join('')}
+        `
+      );
+    } else if (key === 'writing') {
+      openDrawer(
+        'WRITING :: NOTES',
+        `
+          <h2 class="drawer__title" id="drawer-title">Writing</h2>
+          ${DATA.writing
+            .map(
+              (post) => `
+            <div class="drawer__card">
+              <div class="drawer__card-top"><span>${post.date}</span><span>${post.readTime}</span></div>
+              <div class="drawer__card-title">${post.title}</div>
+              <div class="drawer__card-desc">${post.excerpt}</div>
+            </div>
+          `
+            )
+            .join('')}
+        `
+      );
+    } else if (key === 'studio') {
+      const s = DATA.studio;
+      openDrawer(
+        'STUDIO :: PRACTICE',
+        `
+          <h2 class="drawer__title" id="drawer-title">${s.name}</h2>
+          <p class="drawer__lead">${s.lead}</p>
+          <p class="drawer__lead">${s.description}</p>
+          ${s.engagements
+            .map(
+              (eng) => `
+            <div class="drawer__card">
+              <div class="drawer__card-top"><span>ENGAGEMENT</span><span>${eng.timeline}</span></div>
+              <div class="drawer__card-title">${eng.title}</div>
+              <div class="drawer__card-desc">${eng.detail}</div>
+            </div>
+          `
+            )
+            .join('')}
+        `
+      );
+    } else if (key === 'contact') {
+      const c = DATA.contact;
+      openDrawer(
+        `CONTACT :: BOOKING ${c.booking}`,
+        `
+          <h2 class="drawer__title" id="drawer-title">Start a conversation</h2>
+          <p class="drawer__lead">Currently booking select design engineering and digital flagship engagements for ${c.booking}.</p>
+          <div class="drawer__meta-grid">
+            <div class="drawer__meta-box">
+              <span class="drawer__meta-label">Direct Email</span>
+              <span class="drawer__meta-val">${c.email}</span>
+            </div>
+            <div class="drawer__meta-box">
+              <span class="drawer__meta-label">Location</span>
+              <span class="drawer__meta-val">${c.location}</span>
+            </div>
+          </div>
+          <a class="drawer__cta-link" href="mailto:${c.email}">Email ${c.email} ↗</a>
+          <div class="drawer__chips">
+            ${c.socials.map((s) => `<a class="drawer__chip" href="${s.url}" target="_blank" rel="noopener noreferrer">${s.label} · ${s.handle}</a>`).join('')}
+          </div>
+        `
+      );
+    } else if (key === 'updates') {
+      openDrawer(
+        "WHAT'S NEW :: CHANGELOG",
+        `
+          <h2 class="drawer__title" id="drawer-title">What’s new</h2>
+          ${UPDATES.map(
+            (u) => `
+            <div class="drawer__card">
+              <div class="drawer__card-top"><span>${u.tag}</span><span>${u.date}</span></div>
+              <div class="drawer__card-title">${u.title}</div>
+              <div class="drawer__card-desc">${u.desc}</div>
+            </div>
+          `
+          ).join('')}
+        `
+      );
+    }
+  }
+
+  function bindDrawers() {
+    document.querySelectorAll('[data-drawer]').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        openSectionDrawer(btn.getAttribute('data-drawer'));
+      });
+    });
+    drawerClose.addEventListener('click', closeDrawer);
+    drawerBackdrop.addEventListener('click', closeDrawer);
+  }
+
+  /* ========================================================================
+     7. ⌘K Command Palette
+     ======================================================================== */
+  function buildCmdkCatalog() {
+    const navCmds = [
+      { code: 'NAV', title: 'About Marcus Vance', meta: 'Drawer', action: () => openSectionDrawer('about') },
+      { code: 'NAV', title: 'Interaction Lab', meta: 'Drawer', action: () => openSectionDrawer('lab') },
+      { code: 'NAV', title: 'Writing & Essays', meta: 'Drawer', action: () => openSectionDrawer('writing') },
+      { code: 'NAV', title: 'Vance Studio', meta: 'Drawer', action: () => openSectionDrawer('studio') },
+      { code: 'NAV', title: 'Contact & Booking (Q2’27)', meta: 'Drawer', action: () => openSectionDrawer('contact') },
+      {
+        code: 'SYS',
+        title: 'Toggle Dark / Light Theme',
+        meta: 'Theme',
+        action: () => {
+          const curr = document.documentElement.getAttribute('data-theme');
+          applyTheme(curr === 'dark' ? 'light' : 'dark');
+        }
+      }
+    ];
+
+    const projCmds = PROJECTS.map((p, idx) => ({
+      code: `N°${p.index}`,
+      title: p.title,
+      meta: `${p.collaborator} · ${p.year}`,
+      action: () => {
+        goToShortestIndex(idx);
+      }
+    }));
+
+    return [...projCmds, ...navCmds];
+  }
+
+  const ALL_CMDK = buildCmdkCatalog();
+
+  function renderCmdkList(query) {
+    const q = (query || '').trim().toLowerCase();
+    cmdkItems = q
+      ? ALL_CMDK.filter((item) => `${item.code} ${item.title} ${item.meta}`.toLowerCase().includes(q))
+      : ALL_CMDK;
+    cmdkSelected = 0;
+
+    cmdkList.innerHTML = cmdkItems
+      .map(
+        (item, idx) => `
+      <button type="button" class="cmdk-item ${idx === 0 ? 'is-selected' : ''}" data-cmdk-idx="${idx}" role="option">
+        <span class="cmdk-item__left">
+          <span class="cmdk-item__code">${item.code}</span>
+          <span class="cmdk-item__title">${item.title}</span>
+        </span>
+        <span class="cmdk-item__meta">${item.meta}</span>
+      </button>
+    `
+      )
+      .join('');
+
+    cmdkList.querySelectorAll('.cmdk-item').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        cmdkSelected = Number(btn.dataset.cmdkIdx);
+        runCmdkSelection();
+      });
+    });
+  }
+
+  function moveCmdkSelection(delta) {
+    if (!cmdkItems.length) return;
+    cmdkSelected = mod(cmdkSelected + delta, cmdkItems.length);
+    cmdkList.querySelectorAll('.cmdk-item').forEach((el, idx) => {
+      el.classList.toggle('is-selected', idx === cmdkSelected);
+      if (idx === cmdkSelected) el.scrollIntoView({ block: 'nearest' });
+    });
+  }
+
+  function runCmdkSelection() {
+    const item = cmdkItems[cmdkSelected];
+    if (!item) return;
+    closeCmdk();
+    item.action();
+  }
+
+  function openCmdk() {
+    isCmdkOpen = true;
+    cmdkBackdrop.hidden = false;
+    cmdkInput.value = '';
+    renderCmdkList('');
+    setTimeout(() => cmdkInput.focus(), 10);
+  }
+
+  function closeCmdk() {
+    isCmdkOpen = false;
+    cmdkBackdrop.hidden = true;
+  }
+
+  function toggleCmdk() {
+    if (isCmdkOpen) closeCmdk();
+    else openCmdk();
+  }
+
+  function bindCmdk() {
+    cmdkTrigger.addEventListener('click', openCmdk);
+    cmdkBackdrop.addEventListener('click', (e) => {
+      if (e.target === cmdkBackdrop) closeCmdk();
+    });
+    cmdkInput.addEventListener('input', (e) => renderCmdkList(e.target.value));
+  }
+
+  /* ========================================================================
+     8. Main 60fps Animation Loop (Wheel Spring + FPS + Peer Cursors)
+     ======================================================================== */
+  let frameCount = 0;
+  let lastFpsTime = performance.now();
+
+  function tick(now) {
+    // Smooth exponential spring interpolation for twin wheels
+    currentPos += (targetPos - currentPos) * 0.11;
+    if (Math.abs(targetPos - currentPos) < 0.0005) {
+      currentPos = targetPos;
+    }
+
+    layoutWheels(currentPos);
+    updatePeerCursors(now);
+
+    // Live FPS readout
+    frameCount++;
+    if (now - lastFpsTime >= 1000) {
+      const fps = Math.min(120, Math.round((frameCount * 1000) / (now - lastFpsTime)));
+      chipFps.textContent = `FPS::${fps}`;
+      frameCount = 0;
+      lastFpsTime = now;
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  /* ========================================================================
+     Bootstrap
+     ======================================================================== */
+  buildWheels();
+  initTheme();
+  initPresenceCursors();
+  startTelemetry();
+  bindStageControls();
+  bindDrawers();
+  bindCmdk();
+  requestAnimationFrame(tick);
 })();
