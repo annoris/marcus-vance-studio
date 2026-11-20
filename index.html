@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Marcus Vance :: Creative Developer &amp; Brand Engineer</title>
+  <meta name="description" content="Independent creative developer, design engineer, and studio founder crafting tactile web experiences with a taste for pure digital originality. Based in London.">
+  <meta name="theme-color" content="#141619">
+
+  <!-- OpenGraph / Twitter -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Marcus Vance :: Creative Developer & Brand Engineer">
+  <meta property="og:description" content="Independent creative developer, design engineer, and studio founder crafting tactile web experiences. Based in London.">
+  <meta property="og:image" content="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1400&q=85">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Marcus Vance :: Creative Developer & Brand Engineer">
+  <meta name="twitter:description" content="Independent creative developer, design engineer, and studio founder crafting tactile web experiences.">
+
+  <!-- Fonts: Geist & Geist Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Geist+Mono:wght@400;500&family=Geist:wght@300;400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Styles -->
+  <link rel="stylesheet" href="assets/css/styles.css">
+</head>
+<body>
+  <!-- Subtle Tactile Paper Grain Overlay -->
+  <div class="grain" aria-hidden="true"></div>
+
+  <!-- Fixed Top Header -->
+  <header class="header">
+    <!-- Telemetry HUD Strip -->
+    <div class="hud" aria-label="Live studio telemetry">
+      <div class="hud__group">
+        <span class="hud__item">LDN:: <strong id="hud-time">--:--</strong></span>
+        <span class="hud__item hud__item--secondary">FPS:: <strong id="hud-fps">60</strong></span>
+        <span class="hud__item hud__item--secondary">ONLINE:: <strong>1</strong></span>
+        <span class="hud__item hud__item--secondary">LCP:: <strong id="hud-lcp">0.3s</strong></span>
+        <span class="hud__item">
+          <span class="hud__dot" aria-hidden="true"></span>
+          MARCUS:: <strong>HERE</strong>
+        </span>
+        <span class="hud__item hud__item--secondary">PRESENCE:: <strong>ON</strong></span>
+      </div>
+      <button type="button" class="hud__booking" data-drawer="contact">
+        BOOKING:: Q2’27
+      </button>
+    </div>
+
+    <!-- Main Navigation Bar -->
+    <div class="header__bar">
+      <a href="#stage" class="brand-mark" aria-label="Marcus Vance Home">M V ::</a>
+
+      <nav class="nav" aria-label="Primary navigation">
+        <div class="nav__links">
+          <button type="button" class="nav__link" data-drawer="about">About</button>
+          <button type="button" class="nav__link" data-drawer="lab">Lab</button>
+          <button type="button" class="nav__link" data-drawer="writing">Writing</button>
+          <button type="button" class="nav__link" data-drawer="studio">Studio</button>
+          <button type="button" class="nav__link" data-drawer="contact">Contact</button>
+        </div>
+
+        <div class="nav__utils">
+          <button type="button" class="cmd-trigger" id="cmd-trigger" aria-label="Open command palette">
+            <span>Search</span>
+            <kbd>⌘K</kbd>
+          </button>
+
+          <button type="button" class="theme-toggle" id="theme-toggle" aria-label="Toggle dark and light theme">
+            <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <circle cx="12" cy="12" r="4"></circle>
+              <path d="M12 2v2m0 16v2M4.93 4.93l1.41 1.41m11.32 11.32 1.41 1.41M2 12h2m16 0h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path>
+            </svg>
+            <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"></path>
+            </svg>
+          </button>
+        </div>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- Interactive Stage (.hv2__stage) -->
+    <section class="hv2__stage" id="stage" aria-label="Featured work stage">
+      <div class="stage__grid">
+        <!-- Previous Project Glimpse -->
+        <button type="button" class="stage__side stage__side--prev" id="stage-prev-card" aria-label="Previous featured project">
+          <span class="stage__side-label">← Prev</span>
+          <div class="stage__thumb">
+            <img id="stage-prev-img" src="https://images.unsplash.com/photo-1507679799987-c73779587ccf?auto=format&fit=crop&w=1400&q=85" alt="Previous project preview" loading="lazy">
+          </div>
+        </button>
+
+        <!-- Active Centerpiece -->
+        <div class="stage__center">
+          <p class="stage__eyebrow" id="stage-counter">01 / 06 — SELECTED WORK</p>
+
+          <div class="stage__frame" id="stage-frame" title="Click or drag to cycle projects">
+            <img id="stage-img" src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=1400&q=85" alt="Kestrel — Spatial Interface & Identity" fetchpriority="high">
+          </div>
+
+          <div class="stage__title-drum">
+            <h1 class="stage__title" id="stage-title">Kestrel</h1>
+          </div>
+
+          <div class="stage__meta">
+            <span class="chip" id="stage-collab">w/ kestrel labs</span>
+            <span class="chip chip--year" id="stage-year">2026</span>
+          </div>
+
+          <div class="stage__actions">
+            <button type="button" class="stage__arrow-btn" id="stage-prev-btn" aria-label="Previous project">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m15 18-6-6 6-6"></path>
+              </svg>
+            </button>
+
+            <button type="button" class="btn btn--primary" id="stage-view-btn">
+              View project ↗
+            </button>
+
+            <button type="button" class="stage__arrow-btn" id="stage-next-btn" aria-label="Next project">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="m9 18 6-6-6-6"></path>
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Next Project Glimpse -->
+        <button type="button" class="stage__side stage__side--next" id="stage-next-card" aria-label="Next featured project">
+          <span class="stage__side-label">Next →</span>
+          <div class="stage__thumb">
+            <img id="stage-next-img" src="https://images.unsplash.com/photo-1634017839464-5c339ebe3cb4?auto=format&fit=crop&w=1400&q=85" alt="Next project preview" loading="lazy">
+          </div>
+        </button>
+      </div>
+
+      <div class="stage__footer">
+        <a href="#index" class="stage__scroll">Scroll for index ↓</a>
+        <span id="stage-footer-counter">01 — 06</span>
+      </div>
+    </section>
+
+    <!-- Classic Selected Work Index (.hv2__classic) -->
+    <section class="hv2__classic" id="index" aria-labelledby="selected-work-heading">
+      <div class="classic__head">
+        <h2 class="text-meta" id="selected-work-heading">Selected work</h2>
+        <span class="text-meta">12 Projects · 2024—2026</span>
+      </div>
+
+      <ul class="classic__list" id="classic-list">
+        <!-- Populated by assets/js/app.js -->
+      </ul>
+    </section>
+  </main>
+
+  <!-- Minimal Editorial Footer -->
+  <footer class="footer">
+    <div class="footer__inner">
+      <span>© 2026 Marcus Vance · Vance Studio · London</span>
+      <div class="footer__links">
+        <button type="button" data-drawer="about">About</button>
+        <button type="button" data-drawer="studio">Studio</button>
+        <button type="button" data-drawer="contact">Contact</button>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Floating Hover Preview Thumbnail (Desktop) -->
+  <div class="hover-preview" id="hover-preview" aria-hidden="true">
+    <img id="hover-preview-img" src="" alt="">
+  </div>
+
+  <!-- Slide-Over Drawer -->
+  <div class="drawer-backdrop" id="drawer-backdrop"></div>
+  <aside class="drawer" id="drawer" role="dialog" aria-modal="true" aria-hidden="true" aria-labelledby="drawer-eyebrow">
+    <div class="drawer__header">
+      <span class="drawer__eyebrow" id="drawer-eyebrow">DETAILS</span>
+      <button type="button" class="drawer__close" id="drawer-close" aria-label="Close drawer">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M18 6 6 18M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+    <div class="drawer__body" id="drawer-body"></div>
+  </aside>
+
+  <!-- Command Palette (⌘K) -->
+  <div class="cmd" id="cmd" role="dialog" aria-modal="true" aria-hidden="true" aria-label="Command palette">
+    <div class="cmd__dialog">
+      <div class="cmd__input-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="11" cy="11" r="8"></circle>
+          <path d="m21 21-4.3-4.3"></path>
+        </svg>
+        <input type="text" class="cmd__input" id="cmd-input" placeholder="Search projects, sections, or actions..." autocomplete="off" spellcheck="false">
+        <span class="cmd__kbd">ESC</span>
+      </div>
+      <ul class="cmd__list" id="cmd-list" role="listbox"></ul>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <!-- Scripts -->
+  <script src="data/projects.js"></script>
+  <script src="assets/js/app.js"></script>
+</body>
+</html>
