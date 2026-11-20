@@ -9,7 +9,7 @@
     <img src="https://img.shields.io/badge/LIVE_DEMO-Launch_Studio-4F9CF9?style=for-the-badge&logo=githubpages&logoColor=141619" alt="Live Demo" />
   </a>
   <a href="https://github.com/annoris/marcus-vance-studio/stargazers">
-    <img src="https://img.shields.io/badge/STAR_THIS_REPO-Support_Project-1C1F24?style=for-the-badge&logo=github&logoColor=F3F5F8" alt="Star on GitHub" />
+    <img src="https://img.shields.io/badge/STAR_THIS_REPO-Bookmark_Showcase-1C1F24?style=for-the-badge&logo=github&logoColor=F3F5F8" alt="Star on GitHub" />
   </a>
 </p>
 
@@ -18,7 +18,7 @@
   <img src="https://img.shields.io/badge/CSS3-Obsidian_%26_Cobalt-4F9CF9?style=flat-square&logo=css3&logoColor=141619" alt="CSS3" />
   <img src="https://img.shields.io/badge/JavaScript-Vanilla_ES6-98A1AE?style=flat-square&logo=javascript&logoColor=141619" alt="Vanilla ES6" />
   <img src="https://img.shields.io/badge/Dependencies-Zero-1C1F24?style=flat-square" alt="Zero Dependencies" />
-  <img src="https://img.shields.io/badge/License-MIT-4F9CF9?style=flat-square" alt="MIT License" />
+  <img src="https://img.shields.io/badge/License-All_Rights_Reserved-B91C1C?style=flat-square" alt="All Rights Reserved" />
 </p>
 
 <br />
@@ -27,7 +27,7 @@
   <img src="./assets/images/project-01.jpg" alt="Marcus Vance Studio — Interactive Twin-Wheel Portfolio Preview" width="100%" />
 </a>
 
-**[Launch Live Studio](https://annoris.github.io/marcus-vance-studio/)** · **[Twin-Wheel Architecture](#-core-architecture--features)** · **[Design System](#-obsidian-slate--glacial-cobalt-design-system)** · **[Quick Start](#-quick-start-local-setup)** · **[Support via Solana](#-support--contribute-full-source-access)**
+**[Launch Live Demo](https://annoris.github.io/marcus-vance-studio/)** · **[Twin-Wheel Architecture](#-core-architecture--features)** · **[Design System](#-obsidian-slate--glacial-cobalt-design-system)** · **[Commercial License & Source Access](#-commercial-license--full-clean-source-access)**
 
 </div>
 
@@ -39,13 +39,12 @@
 
 Engineered with **pure HTML5, CSS3, and Vanilla ES6 JavaScript**, it delivers 60fps tactile motion with **zero build tools and zero external runtime dependencies**.
 
-### Why Star or Fork This Repo?
+### Key Highlights
 
 - **Signature Counter-Rotating Twin-Wheel Stage**: Locked `100vw × 100vh` canvas with smooth inertial wheel, pointer drag, and keyboard arrow navigation.
 - **Live Telemetry HUD**: Real-time London clock (`LDN::`), live `FPS` monitor, `LCP` metric, `ONLINE` counter, `PRESENCE::ON/OFF` toggle, and `BOOKING` status chip.
 - **Multiplayer Presence & `⌘K` Command Palette**: Ambient floating peer cursors with presence toast notifications, plus an instant keyboard-driven command palette (`⌘K` / `Ctrl+K`) to jump to any project, drawer, or theme.
 - **12 Curated Projects + 6 Slide-Over Drawers**: Custom geometric SVG emblems, high-contrast case-study cards, and slide-over drawers (`About`, `Lab`, `Writing`, `Studio`, `Contact`, `What's new`).
-- **100% Open Source (MIT)**: Complete, full-featured source code ready to customize and deploy in seconds.
 
 ---
 
@@ -84,51 +83,18 @@ Engineered with **pure HTML5, CSS3, and Vanilla ES6 JavaScript**, it delivers 60
 
 ---
 
-## Project Structure
+## Commercial License & Full Clean Source Access
 
-```text
-marcus-vance-studio/
-├── index.html                  # Locked 100vh stage, 2-tier telemetry HUD, drawers & ⌘K palette
-├── DESIGN_SPEC.md              # Full architectural & visual design specification
-├── assets/
-│   ├── css/
-│   │   └── styles.css          # Obsidian Slate & Cool Stone tokens, twin-wheel layout & grain
-│   ├── js/
-│   │   └── app.js              # Twin-wheel physics, live telemetry, presence cursors & ⌘K logic
-│   └── images/
-│       ├── project-01.jpg ... project-12.jpg   # 12 curated project visuals
-│       └── solana-qr.png       # Solana (SOL) support wallet QR code
-├── data/
-│   └── projects.js             # 12 curated projects, geometric SVG emblems & drawer content
-├── .gitignore
-├── LICENSE
-└── README.md
-```
+Explore the full interactive experience right now via the official **[Live Demo](https://annoris.github.io/marcus-vance-studio/)**.
 
----
+> **Proprietary License Notice:** Copyright © 2026 Annoris / Marcus Vance Studio. **All Rights Reserved.** Copying, cloning, redistributing, or using this codebase for personal or commercial projects without a verified license is strictly prohibited. See [LICENSE](LICENSE) for full terms.
 
-## Quick-Start Local Setup
+### Unlock Full Clean, Unminified Source Code + Commercial License
 
-```bash
-# 1. Clone the repository
-git clone https://github.com/annoris/marcus-vance-studio.git
-cd marcus-vance-studio
+To obtain a **commercial license** and receive the **full clean, unminified source package** (including all 12 projects, custom geometric SVG emblems, twin-wheel physics engine, Dark/Light design tokens, and `DESIGN_SPEC.md`):
 
-# 2. Serve locally (no build step required)
-npx serve .
-# or
-python3 -m http.server 8080
-```
-
-Open **`http://localhost:8080`** in your browser—or explore it live right now at **[https://annoris.github.io/marcus-vance-studio/](https://annoris.github.io/marcus-vance-studio/)**.
-
----
-
-## Support / Contribute & Full Source Access
-
-The **complete, full-featured source code** for Marcus Vance Studio (`MV`)—the twin-wheel physics engine, live telemetry HUD, presence cursors, `⌘K` Command Palette, all 12 projects, and both Dark & Light themes—is included right here in this repository under the [MIT License](LICENSE).
-
-If this project inspires your own portfolio or saves you hours of creative engineering, consider **starring the repository** or supporting future open-source releases via **Solana (SOL)**:
+1. **Send a contribution via Solana (`SOL`)** to the official wallet below.
+2. **Send your Solana transaction hash + GitHub username** via GitHub Issues or direct contact to verify your contribution and unlock full commercial source access.
 
 <div align="center">
 
@@ -147,5 +113,5 @@ If this project inspires your own portfolio or saves you hours of creative engin
 ---
 
 <div align="center">
-  <sub>If you found this studio showcase useful, please consider giving it a ⭐ on <a href="https://github.com/annoris/marcus-vance-studio">GitHub</a> and sharing the <a href="https://annoris.github.io/marcus-vance-studio/">Live Demo</a>.</sub>
+  <sub>© 2026 Annoris / Marcus Vance Studio — All Rights Reserved. Explore the <a href="https://annoris.github.io/marcus-vance-studio/">Live Demo</a>.</sub>
 </div>

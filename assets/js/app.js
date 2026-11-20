@@ -1,10 +1,33 @@
 /**
+ * ==========================================================================
+ * Copyright (c) 2026 Annoris / Marcus Vance Studio. All Rights Reserved.
+ * PROPRIETARY SOFTWARE — Unauthorized copying, cloning, or commercial use
+ * without a verified Solana (SOL) license is strictly prohibited.
+ * Official Demo: https://annoris.github.io/marcus-vance-studio/
+ * ==========================================================================
  * Marcus Vance Studio — Twin-Wheel 100vh Stage Engine
  * Counter-rotating linked 3D curved wheels, live telemetry,
  * peer presence cursors, slide-over drawers, and ⌘K command palette.
  */
 (function () {
   'use strict';
+
+  // Proprietary copyright notice in DevTools console
+  if (typeof console !== 'undefined' && console.log) {
+    console.log(
+      '%c © 2026 Annoris / Marcus Vance Studio — All Rights Reserved ',
+      'background:#141619;color:#4f9cf9;font-weight:700;padding:6px 10px;border:1px solid #4f9cf9;border-radius:4px;'
+    );
+    console.log(
+      '%cProprietary source code. Copying or commercial use without a verified Solana (SOL) license is prohibited. See README.md for full clean source access.',
+      'color:#98a1ae;font-size:12px;'
+    );
+  }
+
+  // Lightweight right-click deterrent (preserves all interactive UI & Live Demo)
+  document.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+  });
 
   const DATA = window.MARCUS_VANCE_DATA;
   if (!DATA || !Array.isArray(DATA.projects)) return;

@@ -1,21 +1,33 @@
-MIT License
+PROPRIETARY COMMERCIAL LICENSE — ALL RIGHTS RESERVED
 
-Copyright (c) 2026 Marcus Vance Studio
+Copyright (c) 2026 Annoris / Marcus Vance Studio
+All Rights Reserved.
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+NOTICE:
+This repository and all associated source code, stylesheets, scripts, design
+systems, geometric SVG emblems, media assets, and documentation (collectively,
+the "Software") are the exclusive proprietary intellectual property of Annoris /
+Marcus Vance Studio.
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
+STRICT RESTRICTIONS:
+Without a verified commercial license obtained via an approved Solana (SOL)
+contribution, you are strictly prohibited from:
+  1. Copying, cloning, downloading, or mirroring this Software for personal,
+     client, or commercial use.
+  2. Modifying, adapting, decompiling, reverse-engineering, or creating
+     derivative works from this Software.
+  3. Redistributing, publishing, sublicensing, selling, or hosting this
+     Software (in whole or in part) on any public or private server.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+PERMITTED USE:
+You may view and interact with the official Live Demo hosted at:
+https://annoris.github.io/marcus-vance-studio/
+
+COMMERCIAL LICENSE & FULL CLEAN SOURCE ACCESS:
+To obtain a valid commercial license and full clean, unminified source access,
+submit a contribution via Solana (SOL) to the official wallet listed in
+README.md and provide your transaction hash and GitHub username for
+verification.
+
+Unauthorized use, reproduction, or distribution of this Software is a violation
+of applicable copyright and intellectual property laws.
